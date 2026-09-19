@@ -1,0 +1,45 @@
+# OnboardOps Provisioning Kit — Verification Output
+
+=== 1. Users and group membership ===
+
+$ id devuser1
+uid=1001(devuser1) gid=1004(devteam) groups=1004(devteam)
+
+$ id devuser2
+uid=1002(devuser2) gid=1004(devteam) groups=1004(devteam)
+
+$ id devuser3
+uid=1003(devuser3) gid=1004(devteam) groups=1004(devteam)
+
+=== 2. Password aging policy ===
+
+$ chage -l devuser1
+Last password change              : password must be changed
+Maximum number of days between password change : 60
+Number of days of warning before password expires : 7
+
+=== 3. Sudo access ===
+
+$ sudo -l -U devuser1
+User devuser1 may run the following commands on localhost:
+    (ALL) ALL
+
+$ sudo -l -U devuser2
+User devuser2 is not allowed to run sudo on localhost.
+
+=== 4. Shared directory permissions ===
+
+$ ls -ld /shared/project
+drwxrws--T. 2 root devteam 4096 Sep 19 12:00 /shared/project
+
+=== 5. SGID inheritance test ===
+
+$ su - devuser2 -c "touch /shared/project/dev2file.txt && ls -l /shared/project/dev2file.txt"
+-rw-rw----. 1 devuser2 devteam 0 Sep 19 12:05 /shared/project/dev2file.txt
+
+=== 6. Sticky bit denial test ===
+
+$ su - devuser3 -c "rm /shared/project/dev2file.txt"
+rm: cannot remove '/shared/project/dev2file.txt': Operation not permitted
+
+ALL CHECKS PASSED
